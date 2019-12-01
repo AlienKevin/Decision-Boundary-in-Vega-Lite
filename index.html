@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Decision Boundary in Vega-Lite</title>
+    <meta charset="utf-8" />
+
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.8.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@4.0.0-beta.12"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.1.0"></script>
+</head>
+
+<body>
+    <h1>Decision Boundary in Vega-Lite</h1>
+    <!-- Container for the visualization -->
+    <div id="vis"></div>
+    <button id="addPointBtn">Add Point</button>
+
+    <script>
+        const width = 500;
+        const height = 500;
+
+        const xMax = 1;
+        const yMax = 1;
+
+        function generateRandomPoints(num) {
+            return new Array(num).fill(null).map((point) => {
+                return {
+                    x: Math.random() * xMax,
+                    y: Math.random() * yMax,
+                    group: choose('group1', 'group2')
+                }
+            });
+        }
+
+        function choose(...options) {
+            if (options.length === 0) {
+                return undefined;
+            }
+            return options[Math.floor(Math.random() * options.length)]
+        }
+
+        const decisionLine = [
+            {
+                "x": 0,
+                "y": 0.8,
+            },
+            {
+                "x": 1,
+                "y": 0,
+            },
+        ]
+
+        const fullCanvas = [
+            {
+                "x": 0,
+                "y": 1,
+            },
+            {
+                "x": 1,
+                "y": 1,
+            },
+        ]
+
+        const points = generateRandomPoints(10);
+
+        var vlSpec = {
+            $schema: 'https://vega.github.io/schema/vega-lite/v4.json',
+            layer: [
+                {
+                    "data": {
+                        values: fullCanvas
+                    },
+                    "mark": {
+                        "type": "area",
+                        "color": "#e68e47"
+                    },
+                    "encoding": {
+                        "x": { "field": "x", "type": "quantitative" },
+                        "y": { "field": "y", "type": "quantitative" }
+                    }
+                },
+                {
+                    "data": {
+                        values: decisionLine
+                    },
+                    "mark": {
+                        "type": "area",
+                        "color": "lightblue"
+                    },
+                    "encoding": {
+                        "x": { "field": "x", "type": "quantitative" },
+                        "y": { "field": "y", "type": "quantitative" }
+                    }
+                },
+                {
+                    "data": {
+                        values: decisionLine
+                    },
+                    "mark": {
+                        "type": "line",
+                        "color": "#f0db1d",
+                        "strokeWidth": 5
+                    },
+                    "encoding": {
+                        "x": { "field": "x", "type": "quantitative" },
+                        "y": { "field": "y", "type": "quantitative" }
+                    }
+                },
+                {
+                    data: {
+                        name: "points",
+                        values: points
+                    },
+                    mark: {
+                        type: 'circle',
+                    },
+                    encoding: {
+                        y: {
+                            field: 'y',
+                            type: 'quantitative',
+                            axis: {
+                                title: 'y'
+                            }
+                        },
+                        x: {
+                            field: 'x',
+                            type: 'quantitative',
+                            axis: {
+                                title: 'x'
+                            }
+                        },
+                        color: {
+                            "field": "group",
+                            "type": "nominal"
+                        },
+                    }
+                },
+            ]
+        };
+
+        // Embed the visualization in the container with id `vis`
+        vegaEmbed('#vis', vlSpec).then((res) => {
+            document.querySelector("#addPointBtn").addEventListener(
+                "click",
+                function () {
+                    var changeSet = vega
+                        .changeset()
+                        .insert(generateRandomPoints(1))
+                    res.view.change('points', changeSet).run();
+                }
+            )
+        });
+
+    </script>
+</body>
+
+</html>
